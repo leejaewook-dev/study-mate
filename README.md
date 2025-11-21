@@ -75,20 +75,20 @@ AI 기반 학습 보조도구 **Study-Mate**는 대학 강의 PDF(PPT)를 업로
 ---
 
 ## 📦 프로젝트 폴더 구조
-study-mate/
-├── app.py # Streamlit 메인 앱
-├── utils/
-│ ├── extract_pdf.py # PDF 텍스트 추출
-│ ├── chunker.py # 페이지 → 청크 분리
-│ ├── chroma_db.py # Chroma DB 저장/검색
-│ ├── llm_gemini.py # Gemini 요약/문제 생성 로직
-│
-├── chroma_db/ # (자동 생성, Git에 올리면 안됨)
-├── data/
-│ └── uploaded/ # PDF 업로드 저장 폴더
-├── .gitignore
-├── README.md
-└── requirements.txt
+
+- `app.py` – Streamlit 메인 앱
+- `utils/`
+  - `extract_pdf.py` – PDF 텍스트 추출
+  - `chunker.py` – 페이지 → 청크 분리
+  - `chroma_db.py` – Chroma DB 저장/검색
+  - `llm_gemini.py` – Gemini 요약/문제 생성 로직
+- `data/`
+  - `uploaded/` – 업로드된 PDF 저장 폴더
+- `chroma_db/` – 벡터 DB 및 인덱스 (자동 생성, Git에 올리지 않음)
+- `requirements.txt` – 파이썬 의존성 목록  
+- `README.md` – 프로젝트 설명
+- `.gitignore` – 불필요 파일(Git 추적 제외) 설정
+
 
 
 ---
@@ -96,15 +96,21 @@ study-mate/
 ## 🚀 실행 방법
 
 ### 1) 가상환경 생성 & 활성화
+
 ```bash
 python -m venv .venv
-source .venv/Scripts/activate   # Windows
+.\.venv\Scripts\activate   # Windows
+```
 
-2) 필요한 패키지 설치
+### 2) 필요한 패키지 설치
+
+```bash
 pip install -r requirements.txt
+```
 
-3) Gemini API Key 설정
-GEMINI_API_KEY=너의_API_KEY
+### 3) 앱 실행
 
-4) 앱 실행
+```bash
 streamlit run app.py
+```
+
