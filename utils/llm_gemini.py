@@ -115,7 +115,12 @@ def generate_page_summaries(pages: List[str]) -> str:
 # ────────────────────────────────────────────
 # 3) 페이지별 문제 생성 (난이도 선택 + JSON 반환)
 # ────────────────────────────────────────────
-def generate_page_questions(pages: List[str], difficulty: str = "medium") -> List[Dict[str, Any]]:
+def generate_page_questions(
+    pages: List[str],
+    selected_pages: List[int],        # 1-based 페이지 번호 리스트
+    num_questions: int = 2,
+    difficulty: str = "medium",
+) -> List[Dict[str, Any]]:
     """
     반환: 각 문제를 나타내는 dict의 리스트
 
@@ -132,16 +137,39 @@ def generate_page_questions(pages: List[str], difficulty: str = "medium") -> Lis
     ]
     """
 
-    pages_short = _compress_pages(pages, 8)
-    context = "\n\n".join(f"[페이지 {i+1}]\n{t}" for i, t in enumerate(pages_short))
+    if not selected_pages:
+        return []
 
+    # ✅ 선택된 페이지 텍스트만 추출 (1-based → 0-based 인덱스 변환)
+    selected_texts = []
+    for p in selected_pages:
+        idx = p - 1
+        if 0 <= idx < len(pages):
+            selected_texts.append(pages[idx])
+
+    # 혹시라도 잘못된 페이지만 들어온 경우 방어
+    if not selected_texts:
+        return []
+
+    # ✅ 선택된 페이지들만 압축
+    pages_short = _compress_pages(selected_texts, 8)
+
+    # ✅ 원본 페이지 번호와 함께 context 구성
+    #    (pages_short 길이와 selected_pages 길이가 동일하다고 가정)
+    context_chunks = []
+    for page_no, text in zip(selected_pages, pages_short):
+        context_chunks.append(f"[페이지 {page_no}]\n{text}")
+
+    context = "\n\n".join(context_chunks)
+
+    # ✅ Gemini 프롬프트에 선택된 페이지 & 문제 개수 반영
     prompt = (
         "너는 대학 강의 PPT 기반 문제를 생성하는 'Study-Mate'다.\n\n"
         "[입력 페이지]\n"
         f"{context}\n\n"
         f"[난이도] {difficulty}\n\n"
         "[문제 생성 규칙]\n"
-        "- 각 페이지마다 2문제씩 생성.\n"
+        f"- 선택된 각 페이지마다 {num_questions}문제씩 생성.\n"
         "- 각 문제는 4지선다 객관식.\n"
         "- 난이도 기준:\n"
         "  * easy: 기본 정의 중심, 직관적인 오답\n"
@@ -163,7 +191,8 @@ def generate_page_questions(pages: List[str], difficulty: str = "medium") -> Lis
         "  \"answer\": 2,                   // 정답 보기 번호 (정수)\n"
         "  \"explain\": \"왜 정답인지 한두 문장으로 설명\"\n"
         "}\n"
-        "- JSON 이외의 텍스트는 절대 출력하지 마라."
+        "- JSON 이외의 텍스트는 절대 출력하지 마라.\n"
+        f"- 반드시 각 페이지마다 정확히 {num_questions}문제씩 생성해라."
     )
 
     try:
