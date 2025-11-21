@@ -209,3 +209,11 @@ __marimo__/
 .env
 .env.*
 *.env
+
+chroma_db/
+data/uploaded/
+__pycache__/
+*.sqlite3
+*.bin
+*.pickle
+
